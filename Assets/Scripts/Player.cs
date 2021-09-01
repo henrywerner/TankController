@@ -7,18 +7,22 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     [SerializeField] private int _maxHealth = 3;
+    [SerializeField] private AudioClip _deathNoise;
     private int _currentHealth;
 
     private TankController _tankController;
+    private InventoryManager _inventory;
 
     private void Awake()
     {
         _tankController = GetComponent<TankController>();
+        _inventory = GetComponent<InventoryManager>();
     }
 
     private void Start()
     {
         _currentHealth = _maxHealth;
+        _inventory.UpdateHud();
     }
 
     public void IncreaseHealth(int amount)
@@ -40,6 +44,8 @@ public class Player : MonoBehaviour
     {
         gameObject.SetActive(false);
         // play particles
+        
         // play sounds
+        AudioHelper.PlayClip2D(_deathNoise, 1f);
     }
 }
