@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using Object = System.Object;
 
 public abstract class CollectableBase : MonoBehaviour
 {
