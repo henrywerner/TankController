@@ -123,9 +123,9 @@ GameObject:
   - component: {fileID: 6556290226751825449}
   - component: {fileID: 6556290226751825448}
   - component: {fileID: 6556290226751825451}
-  - component: {fileID: 6556290226751825450}
+  - component: {fileID: 8618745613574265582}
   m_Layer: 0
-  m_Name: PlayerBullet
+  m_Name: EnemyBullet
   m_TagString: Bullet
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -175,7 +175,7 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 112
   m_CollisionDetection: 0
---- !u!114 &6556290226751825450
+--- !u!114 &8618745613574265582
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -184,13 +184,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 6556290226751825453}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 23bdd5411b2d48deb1672e388d8870f4, type: 3}
+  m_Script: {fileID: 11500000, guid: 4374775c7b794b76b02def26ae8d4aad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _rb: {fileID: 6556290226751825451}
-  _parent: {fileID: 19319007819725113, guid: 3d8db010d6887e646a3181af7feea891, type: 3}
+  _parent: {fileID: 3352534600029580026, guid: 1d0f2a7447933cb46a13f8e51dd6bf9b, type: 3}
   _hitParticles: {fileID: 0}
   _hitSound: {fileID: 0}
   rotation: {x: 0, y: 0, z: 0, w: 0}
   _damage: 0
-  _moveSpeed: 0.3
+  _moveSpeed: 0.1

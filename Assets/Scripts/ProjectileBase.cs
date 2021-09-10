@@ -15,12 +15,16 @@ public abstract class ProjectileBase : MonoBehaviour
     
     // note: I'm going to make a separate script for friendly and enemy projectiles 
     
+    [Header("Body stuff")]
     [SerializeField] private Rigidbody _rb;
-    [SerializeField] private float _moveSpeed = 0.3f;
     [SerializeField] private GameObject _parent;
     [SerializeField] private ParticleSystem _hitParticles;
     [SerializeField] private AudioClip _hitSound;
     public Quaternion rotation; // TODO: have a better way to set the rotation on create
+    
+    [Header("Stats")]
+    [SerializeField] private int _damage;
+    [SerializeField] private float _moveSpeed = 0.3f;
     
     private void Awake()
     {
@@ -45,12 +49,21 @@ public abstract class ProjectileBase : MonoBehaviour
         if (other.gameObject.CompareTag("Bullet"))
         {
             print("hit self");
+            //Physics.IgnoreCollision(other.gameObject.GetComponent<Collider>(), GetComponent<Collider>());
         }
         else if (other.gameObject.CompareTag(_parent.tag))
         {
             //Physics.IgnoreCollision(_parent.GetComponent<Collider>(), _rb.GetComponent<Collider>());
             print("hit parent: " + other.gameObject.name);
             //Physics.IgnoreCollision(other.gameObject.GetComponent<Collider>(), GetComponent<Collider>());
+        }
+        else if (other.gameObject.name == "Boss")
+        {
+            print("hit boss: " + other.gameObject.name);
+            Boss b = other.gameObject.GetComponent<Boss>();
+            b.DecreaseHealth(1);
+            Feedback(); // spawn particles and sfx
+            gameObject.SetActive(false);
         }
         else
         {

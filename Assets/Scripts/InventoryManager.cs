@@ -5,7 +5,7 @@ public class InventoryManager : MonoBehaviour
 {
     private int _treasure;
 
-    [SerializeField] private Text treasureUI;
+    //[SerializeField] private Text treasureUI;
     
     public int Treasure
     {
@@ -28,6 +28,6 @@ public class InventoryManager : MonoBehaviour
         for (var x = 0; x < _treasure; x++)
             txt += "TREASURE\n";
 
-        treasureUI.text = txt;
+        //treasureUI.text = txt;
     }
 }
