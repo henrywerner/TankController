@@ -18,6 +18,7 @@ public class TankController : MonoBehaviour
     [SerializeField] private float _fireRate;
     private bool _gunReady = true;
 
+    private Vector3 _bodyRotation;
 
     public float MaxSpeed
     {
@@ -31,57 +32,35 @@ public class TankController : MonoBehaviour
 
         if (_xhair == null)
             print("crosshair not found");
+        
+        _bodyRotation = Vector3.zero;
     }
 
     private void Update()
     {
         _xhair.gameObject.transform.position = Input.mousePosition; // move the crosshair the current mouse position
+        
+        AimLoop();
     }
 
     private void FixedUpdate()
     {
         MoveTank();
-        //TurnTank();
-        AimLoop();
         Fire();
     }
 
     public void MoveTank()
     {
-        // // calculate the move amount
-        // float moveAmountThisFrame = Input.GetAxis("Vertical") * _maxSpeed;
-        // // create a vector from amount and direction
-        // Vector3 moveOffset = transform.forward * moveAmountThisFrame;
-        // // apply vector to the rigidbody
-        // _rb.MovePosition(_rb.position + moveOffset);
-        // // technically adjusting vector is more accurate! (but more complex)
+        Vector3 inputRaw = new Vector3 (Input.GetAxisRaw("Horizontal"), 0f, Input.GetAxisRaw("Vertical"));
+        
+        inputRaw.Normalize (); // clamp all inputs to 1 so that way you can't diagonal strafe
 
-        //Vector3 direction = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
-        //transform.rotation = Quaternion.LookRotation(direction);
+        if (inputRaw != Vector3.zero)
+            _bodyRotation = Quaternion.LookRotation(inputRaw).eulerAngles;
+        
+        _rb.rotation = Quaternion.Slerp (transform.rotation, Quaternion.Euler (_bodyRotation.x, Mathf.Round (_bodyRotation.y / 45) * 45, _bodyRotation.z), 0.5f); // I took this from online
 
-        // float moveAmountThisFrame = Input.GetAxis("Vertical") * _maxSpeed;
-
-        float horizontalInput = Input.GetAxis("Horizontal");
-        float verticalInput = Input.GetAxis("Vertical");
-
-        Vector3 direction = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
-
-        if (direction != Vector3.zero)
-            _rb.rotation = Quaternion.LookRotation(direction); // rotate to face the input direction
-
-        direction = Vector3.ClampMagnitude(direction, 1f); // don't move faster on diagonal strafe
-
-        _rb.position = _rb.position + new Vector3(direction.x * _maxSpeed * Time.deltaTime, 0, direction.z * _maxSpeed * Time.deltaTime);
-    }
-
-    public void TurnTank()
-    {
-        // calculate the turn amount
-        float turnAmountThisFrame = Input.GetAxis("Horizontal") * _turnSpeed;
-        // create a Quaternion from amount and direction (x,y,z)
-        Quaternion turnOffset = Quaternion.Euler(0, turnAmountThisFrame, 0);
-        // apply quaternion to the rigidbody
-        _rb.MoveRotation(_rb.rotation * turnOffset);
+        _rb.MovePosition(_rb.position + new Vector3(inputRaw.x * _maxSpeed, 0, inputRaw.z * _maxSpeed));
     }
 
     void AimLoop()
@@ -96,6 +75,10 @@ public class TankController : MonoBehaviour
             Vector3 direction = reticle - transform.position;
             float rotation = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
             _gun.transform.rotation = Quaternion.Euler(0, rotation, 0); // rotate gun towards mouse cursor
+            
+            //TODO: remove before submission
+            //print("reticle | x:" + reticle.x + " y:" + reticle.y + " z: " + reticle.z);
+            //print("direction | x:" + direction.x + " y:" + direction.y + " z: " + direction.z);
         }
     }
 
@@ -115,8 +98,8 @@ public class TankController : MonoBehaviour
         
         // fire gun
 
-        Instantiate(_bullet, _rb.position, _gun.transform.rotation);
-        print("shoot");
+        GameObject bullet = Instantiate(_bullet, _gun.transform.position, _gun.transform.rotation);
+        Physics.IgnoreCollision(bullet.transform.GetComponent<Collider>(), GetComponent<Collider>());
 
         _gunReady = true;
     }

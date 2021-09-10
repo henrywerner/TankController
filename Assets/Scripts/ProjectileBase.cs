@@ -17,12 +17,15 @@ public abstract class ProjectileBase : MonoBehaviour
     
     [SerializeField] private Rigidbody _rb;
     [SerializeField] private float _moveSpeed = 0.3f;
+    [SerializeField] private GameObject _parent;
+    [SerializeField] private ParticleSystem _hitParticles;
+    [SerializeField] private AudioClip _hitSound;
     public Quaternion rotation; // TODO: have a better way to set the rotation on create
     
     private void Awake()
     {
         _rb = GetComponent<Rigidbody>();
-
+        
         _rb.useGravity = false;
     }
 
@@ -37,16 +40,40 @@ public abstract class ProjectileBase : MonoBehaviour
         rb.MovePosition(rb.position + moveOffset);
     }
     
-    
-
-    private void OnTriggerEnter(Collider other)
+    private void OnCollisionEnter(Collision other)
     {
-        // Player player = other.gameObject.GetComponent<Player>();
-        // if (player != null)
-        // {
-        //     Collect(player);
-        //     Feedback(); // spawn particles and sfx
-        //     gameObject.SetActive(false);
-        // }
+        if (other.gameObject.CompareTag("Bullet"))
+        {
+            print("hit self");
+        }
+        else if (other.gameObject.CompareTag(_parent.tag))
+        {
+            //Physics.IgnoreCollision(_parent.GetComponent<Collider>(), _rb.GetComponent<Collider>());
+            print("hit parent: " + other.gameObject.name);
+            //Physics.IgnoreCollision(other.gameObject.GetComponent<Collider>(), GetComponent<Collider>());
+        }
+        else
+        {
+            print("HIT OTHER: "  + other.gameObject.name);
+            Feedback(); // spawn particles and sfx
+            gameObject.SetActive(false);
+        }
+    }
+
+    private void Feedback()
+    {
+        // particles
+        if (_hitParticles != null)
+        {
+            _hitParticles = Instantiate(_hitParticles, transform.position, Quaternion.identity);
+        }
+        
+        // sfx
+        if (_hitSound != null)
+        {
+            AudioHelper.PlayClip2D(_hitSound, 1f);
+        }
+        
+        Destroy(gameObject);
     }
 }
