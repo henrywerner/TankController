@@ -155,13 +155,14 @@ public class Boss : MonoBehaviour
         }
     }
     
-    private void BurstAttack()
+    private void BurstAttack(float rotation)
     {
-        float startingRotation = 180;
-        int totalBullets = 3;
-        float attackSpread = 15;
+        float startingRotation = rotation;
+        int totalBullets = 5;
+        float attackSpread = 20;
         float angleOffset = attackSpread / totalBullets; // find the angle between each bullet
         float spawnDistance = 4f;
+        startingRotation -= 2 * angleOffset;
         
         Vector3 spawnPos = new Vector3(_rb.transform.position.x, 0.5f, _rb.transform.position.z); // set the spawn pos to the correct height
 
@@ -184,10 +185,15 @@ public class Boss : MonoBehaviour
     
     IEnumerator BurstPattern()
     {
+        Player player = FindObjectOfType<Player>();
+        Vector3 direction = (player.transform.position - transform.position).normalized;
+        Quaternion lookRotation = Quaternion.LookRotation(direction);
+        float startingRotation = lookRotation.eulerAngles.y;
+        
         for (int x = 0; x < 5; x++)
         {
             yield return new WaitForSecondsRealtime(0.2f);
-            BurstAttack();
+            BurstAttack(startingRotation);
         }
     }
 }

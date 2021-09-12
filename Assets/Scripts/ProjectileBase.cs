@@ -43,8 +43,8 @@ public abstract class ProjectileBase : MonoBehaviour
         Vector3 moveOffset = transform.forward * _moveSpeed;
         rb.MovePosition(rb.position + moveOffset);
     }
-    
-    private void OnCollisionEnter(Collision other)
+
+    private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.CompareTag("Bullet"))
         {
