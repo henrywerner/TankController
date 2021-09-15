@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-6939030040618678750
+--- !u!114 &-7381081664085629206
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
@@ -20,24 +20,30 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: M_TankBody
-  m_Shader: {fileID: -6465566751694194690, guid: 47042c3d1fa3f9940b21c81ec6541a79, type: 3}
-  m_ShaderKeywords: 
+  m_Name: M_BossIntitial
+  m_Shader: {fileID: 4800000, guid: 933532a4fcc9baf4fa0491de14d08ed7, type: 3}
+  m_ShaderKeywords: _NORMALMAP _PARALLAXMAP
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
-  m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
-  stringTagMap: {}
-  disabledShaderPasses: []
+  m_DoubleSidedGI: 1
+  m_CustomRenderQueue: 3000
+  stringTagMap:
+    RenderType: Transparent
+  disabledShaderPasses:
+  - SHADOWCASTER
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - Texture2D_c384e596684c4445b4f9e6cc7c47a1b7:
+        m_Texture: {fileID: 2800000, guid: 1cdc5b506b1a4a33a53c30669ced1f51, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _BaseMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 1cdc5b506b1a4a33a53c30669ced1f51, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
@@ -69,7 +75,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ParallaxMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: b4925957b8b84b046b827582f4490038, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SpecGlossMap:
@@ -91,17 +97,17 @@ Material:
     m_Floats:
     - Boolean_4bea6ad0a51845d1b33285283f64bbc0: 0
     - Vector1_210979aaf49b4315ba6f438e4614b137: 0.8
-    - Vector1_2bf784ec75e0421c96d5ae6e53b0e8f2: 1
+    - Vector1_2bf784ec75e0421c96d5ae6e53b0e8f2: 15
     - _AlphaClip: 0
     - _Blend: 0
     - _BumpScale: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
-    - _Cull: 2
+    - _Cull: 0
     - _Cutoff: 0.5
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
-    - _DstBlend: 0
+    - _DstBlend: 10
     - _EnvironmentReflections: 1
     - _GlossMapScale: 1
     - _Glossiness: 0.5
@@ -112,22 +118,22 @@ Material:
     - _Parallax: 0.02
     - _QueueOffset: 0
     - _ReceiveShadows: 1
+    - _SampleGI: 0
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
-    - _SrcBlend: 1
-    - _Surface: 0
+    - _SrcBlend: 5
+    - _Surface: 1
     - _UVSec: 0
     - _WorkflowMode: 1
-    - _ZWrite: 1
-    - shaderActive: 0
+    - _ZWrite: 0
+    - shaderActive: 1
     - shaderOpacity: 0.8
-    - shaderSpeed: 15
+    - shaderSpeed: 1
     m_Colors:
-    - Color_eee4d656061a4d6d90eb9a2d1e7cb3be: {r: 0, g: 0.77254903, b: 0.03137255, a: 1}
-    - _BaseColor: {r: 0, g: 0.77254903, b: 0.03137255, a: 1}
-    - _Color: {r: 0, g: 0.7735849, b: 0.032145713, a: 1}
+    - Color_eee4d656061a4d6d90eb9a2d1e7cb3be: {r: 0.6392157, g: 0, b: 1, a: 1}
+    - _BaseColor: {r: 0.6386528, g: 0, b: 1, a: 1}
+    - _Color: {r: 0.5970125, g: 0, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
-    - shaderColor: {r: 0.27058825, g: 0.7647059, b: 0.21960784, a: 0}
   m_BuildTextureStacks: []

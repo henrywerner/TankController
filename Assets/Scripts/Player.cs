@@ -56,6 +56,21 @@ public class Player : MonoBehaviour, IDamageable
         UpdateHud();
         if (_currentHealth <= 0)
             Kill();
+        StartCoroutine(Iframes());
+    }
+
+    private IEnumerator Iframes()
+    {
+        IsInvincible = true;
+        foreach (var mat in _materials)
+            mat.SetInt("shaderActive", 1);
+        
+        yield return new WaitForSecondsRealtime(3f);
+        
+        foreach (var mat in _materials)
+            mat.SetInt("shaderActive", 0);
+        
+        IsInvincible = false;
     }
 
     private void UpdateHud()

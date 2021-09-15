@@ -3,48 +3,30 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Boss : MonoBehaviour, IDamageable
+public class Boss : MonoBehaviour
 {
     [SerializeField] private int _contactDamage = 1;
     [SerializeField] private ParticleSystem _inpactParticles;
     [SerializeField] private AudioClip _impactSound;
-    [SerializeField] private AudioClip _deathNoise;
-
     private Rigidbody _rb;
+    
+    [Header("Assets")]
+    [SerializeField] private GameObject _cube;
     [SerializeField] private GameObject _bullet;
-
-    [Header("Health")]
-    [SerializeField] private Image _healthBar;
-    [SerializeField] private Image _hurtBar;
-    [SerializeField] private float _bossHealth;
-    private float _currentHealth;
-
-    private bool _isLerping = false;
 
     [Header("Warp")]
     [SerializeField] private GameObject _warpIndicator;
     [SerializeField] private GameObject[] _warpLocations;
-    
-    
-    /*
-     * Needed Vars:
-     * Current Phase
-     * Current Health
-     */
-    
-    /*
-     * Needed Functions:
-     * Movement
-     * Attack -- make a virtual script called attackPattern and then make a bunch of inherited scripts for the different attacks
-     */
+
+    [SerializeField] private Color _objectColor;
 
     private void Awake()
     {
         _rb = GetComponent<Rigidbody>();
-        _currentHealth = _bossHealth;
         _warpIndicator.SetActive(false);
     }
 
+    /* Damage player on contact */
     private void OnCollisionEnter(Collision other)
     {
         Player player = other.gameObject.GetComponent<Player>();
@@ -86,55 +68,12 @@ public class Boss : MonoBehaviour, IDamageable
         if (Input.GetKeyDown(KeyCode.Alpha4))
             StartCoroutine(WarpTo(_warpLocations[3].transform.position));
     }
-    
-    public void Damage(int amount)
+
+    private void FixedUpdate()
     {
-        _currentHealth -= amount;
-        UpdateHud();
-        if (_currentHealth <= 0)
-            Kill();
-    }
-
-    private void UpdateHud()
-    {
-        float scaleX = _currentHealth / _bossHealth;
-        _healthBar.rectTransform.localScale = new Vector3(scaleX, 1, 1);
-
-        if (!_isLerping)
-            StartCoroutine(UpdateHurtBar());
-    }
-
-    IEnumerator UpdateHurtBar()
-    {
-        _isLerping = true;
-        float timeElapsed = 0;
-        float lerpDuration = 3f;
-
-        //yield return new WaitForSecondsRealtime(0.5f);
-
-        while (Math.Abs(_hurtBar.rectTransform.localScale.x - _healthBar.rectTransform.localScale.x) > 0.0001) // done to avoid floating point errors
-        {
-            float hurtBarX = _hurtBar.rectTransform.localScale.x;
-            float healthBarX = _healthBar.rectTransform.localScale.x;
-            
-            float scaleX = Mathf.Lerp(hurtBarX, healthBarX, timeElapsed / lerpDuration);
-            _hurtBar.rectTransform.localScale = new Vector3(scaleX, 1, 1);
-            timeElapsed += Time.deltaTime;
-
-            yield return null;
-        }
-        
-        _isLerping = false;
-    }
-
-    /* Called when the boss dies */
-    public void Kill()
-    {
-        gameObject.SetActive(false);
-        // play particles
-        
-        // play sounds
-        AudioHelper.PlayClip2D(_deathNoise, 1f);
+        Quaternion turnOffset = Quaternion.Euler(1f, 0, 1);
+        //rb.MoveRotation(_rb.rotation * turnOffset);
+        _cube.transform.localRotation = _cube.transform.localRotation * turnOffset;
     }
 
     /* Boss movement for warping around the arena */
@@ -159,6 +98,11 @@ public class Boss : MonoBehaviour, IDamageable
 
         // Complete warp animation
         gameObject.SetActive(true);
+    }
+
+    private void Move()
+    {
+        // if (isMoving)
     }
 
     private void Attack(float startingRotation, int totalBullets, float attackSpread)

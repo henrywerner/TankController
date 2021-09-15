@@ -95,6 +95,10 @@ public class TankController : MonoBehaviour
         // fire gun
         GameObject bullet = Instantiate(_bullet, _gun.transform.position, _gun.transform.rotation);
         Physics.IgnoreCollision(bullet.transform.GetComponent<Collider>(), GetComponent<Collider>());
+        
+        // play noise
+        
+        // vfx
 
         // wait for fire rate duration 
         yield return new WaitForSecondsRealtime(_fireRate);

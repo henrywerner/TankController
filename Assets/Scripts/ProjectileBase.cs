@@ -72,6 +72,8 @@ public abstract class ProjectileBase : MonoBehaviour
         if (_hitParticles != null)
         {
             _hitParticles = Instantiate(_hitParticles, transform.position, Quaternion.identity);
+            _hitParticles.gameObject.SetActive(true);
+            //print("Hit Particles: " + _hitParticles.transform.rotation.eulerAngles);
         }
         
         // sfx
