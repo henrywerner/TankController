@@ -20,6 +20,10 @@ public class TankController : MonoBehaviour
 
     private Vector3 _bodyRotation;
 
+    [Header("VFX / SFX")]
+    [SerializeField] private AudioClip _gunshotSound;
+    [SerializeField] private ParticleSystem _gunshotParticles;
+
     public float MaxSpeed
     {
         get => _maxSpeed;
@@ -97,8 +101,14 @@ public class TankController : MonoBehaviour
         Physics.IgnoreCollision(bullet.transform.GetComponent<Collider>(), GetComponent<Collider>());
         
         // play noise
+        AudioHelper.PlayClip2D(_gunshotSound, 0.8f);
         
         // vfx
+        if (_gunshotParticles != null)
+        {
+            ParticleSystem gunshotVFX = Instantiate(_gunshotParticles, transform.position, Quaternion.identity);
+            gunshotVFX.gameObject.SetActive(true);
+        }
 
         // wait for fire rate duration 
         yield return new WaitForSecondsRealtime(_fireRate);

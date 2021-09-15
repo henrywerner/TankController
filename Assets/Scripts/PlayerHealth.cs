@@ -3,7 +3,7 @@ using System.Collections;
 
 public class PlayerHealth : Health
 {
-    //[SerializeField] private Player _player;
+    [SerializeField] private AudioClip _hurtNoise;
     [SerializeField] private AudioClip _deathNoise;
     [SerializeField] private ParticleSystem _deathVFX;
     [SerializeField] private Material[] _materials;
@@ -35,6 +35,7 @@ public class PlayerHealth : Health
 
         currentHp -= damage;
         UpdateHud();
+        AudioHelper.PlayClip2D(_hurtNoise, 1f);
         if (currentHp <= 0)
             Kill();
         StartCoroutine(Iframes());

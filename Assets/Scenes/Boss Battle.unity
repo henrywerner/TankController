@@ -8191,6 +8191,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1291044971}
     - target: {fileID: 1827676995, guid: 3d8db010d6887e646a3181af7feea891, type: 3}
+      propertyPath: _hurtNoise
+      value: 
+      objectReference: {fileID: 8300000, guid: ca7d756229b5bc343980019aeaebacec, type: 3}
+    - target: {fileID: 1827676995, guid: 3d8db010d6887e646a3181af7feea891, type: 3}
       propertyPath: _hudHearts.Array.data[0]
       value: 
       objectReference: {fileID: 544382764}
@@ -8262,6 +8266,10 @@ PrefabInstance:
       propertyPath: _xhair
       value: 
       objectReference: {fileID: 1575507293}
+    - target: {fileID: 19319007819725117, guid: 3d8db010d6887e646a3181af7feea891, type: 3}
+      propertyPath: _gunshotSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 8e1b1b7a6755c2a4e8cca7b9e27a7ab3, type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3d8db010d6887e646a3181af7feea891, type: 3}
 --- !u!1001 &3352534600122988595
