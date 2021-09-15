@@ -20,7 +20,6 @@ public abstract class ProjectileBase : MonoBehaviour
     [SerializeField] private GameObject _parent;
     [SerializeField] private ParticleSystem _hitParticles;
     [SerializeField] private AudioClip _hitSound;
-    public Quaternion rotation; // TODO: have a better way to set the rotation on create
     
     [Header("Stats")]
     [SerializeField] private int _damage;
@@ -57,17 +56,11 @@ public abstract class ProjectileBase : MonoBehaviour
             print("hit parent: " + other.gameObject.name);
             //Physics.IgnoreCollision(other.gameObject.GetComponent<Collider>(), GetComponent<Collider>());
         }
-        else if (other.gameObject.name == "Boss")
-        {
-            print("hit boss: " + other.gameObject.name);
-            Boss b = other.gameObject.GetComponent<Boss>();
-            b.DecreaseHealth(1);
-            Feedback(); // spawn particles and sfx
-            gameObject.SetActive(false);
-        }
         else
         {
             print("HIT OTHER: "  + other.gameObject.name);
+            IDamageable obj = other.gameObject.GetComponent<IDamageable>();
+            obj?.Damage(_damage); // only apply damage if obj isn't null
             Feedback(); // spawn particles and sfx
             gameObject.SetActive(false);
         }

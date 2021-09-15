@@ -4,17 +4,17 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(TankController))]
-public class Player : MonoBehaviour
+public class Player : MonoBehaviour, IDamageable
 {
     [SerializeField] private int _maxHealth = 3;
     [SerializeField] private AudioClip _deathNoise;
     [SerializeField] private Light _effectLight;
     [SerializeField] private Material[] _materials;
-    //private Hashtable _materialColors;
     private Dictionary<Material, Color> _materialColors;
+    [SerializeField] private GameObject[] _hudHearts;
 
     private int _currentHealth;
-    
+
     public bool IsInvincible { get; set; }
 
     private TankController _tankController;
@@ -37,6 +37,8 @@ public class Player : MonoBehaviour
         {
             _materialColors.Add(mat, mat.color);
         }
+
+        UpdateHud();
     }
 
     public void IncreaseHealth(int amount)
@@ -46,23 +48,42 @@ public class Player : MonoBehaviour
         Debug.Log("Player's health " + _currentHealth);
     }
 
-    public void DecreaseHealth(int amount)
+    public void Damage(int amount)
     {
         if (IsInvincible) return; // Ignore if the player is invincible
 
         _currentHealth -= amount;
-        Debug.Log("Player's health " + _currentHealth);
+        UpdateHud();
         if (_currentHealth <= 0)
             Kill();
+    }
+
+    private void UpdateHud()
+    {
+        if (_hudHearts.Length < _maxHealth)
+            print("Warning: total hudHearts is less than max health.");
+
+        int x = 0;
+        foreach (var heart in _hudHearts)
+        {
+            x++;
+            if (x > _currentHealth)
+            {
+                heart.SetActive(false);
+                continue;
+            }
+
+            heart.SetActive(true);
+        }
     }
 
     public void Kill()
     {
         if (IsInvincible) return; // Ignore if the player is invincible
-        
+
         gameObject.SetActive(false);
         // play particles
-        
+
         // play sounds
         AudioHelper.PlayClip2D(_deathNoise, 1f);
     }
@@ -89,4 +110,3 @@ public class Player : MonoBehaviour
         }
     }
 }
-

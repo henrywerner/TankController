@@ -192,5 +192,5 @@ MonoBehaviour:
   _hitParticles: {fileID: 0}
   _hitSound: {fileID: 0}
   rotation: {x: 0, y: 0, z: 0, w: 0}
-  _damage: 0
+  _damage: 1
   _moveSpeed: 0.3

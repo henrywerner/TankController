@@ -29,7 +29,7 @@ public class Enemy : MonoBehaviour
 
     protected virtual void PlayerImpact(Player player)
     {
-        player.DecreaseHealth(_damageAmount);
+        player.Damage(_damageAmount);
     }
 
     private void ImpactFeedback()

@@ -3,9 +3,9 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Boss : MonoBehaviour
+public class Boss : MonoBehaviour, IDamageable
 {
-    [SerializeField] private int _damageAmount = 1;
+    [SerializeField] private int _contactDamage = 1;
     [SerializeField] private ParticleSystem _inpactParticles;
     [SerializeField] private AudioClip _impactSound;
     [SerializeField] private AudioClip _deathNoise;
@@ -20,6 +20,10 @@ public class Boss : MonoBehaviour
     private float _currentHealth;
 
     private bool _isLerping = false;
+
+    [Header("Warp")]
+    [SerializeField] private GameObject _warpIndicator;
+    [SerializeField] private GameObject[] _warpLocations;
     
     
     /*
@@ -38,6 +42,7 @@ public class Boss : MonoBehaviour
     {
         _rb = GetComponent<Rigidbody>();
         _currentHealth = _bossHealth;
+        _warpIndicator.SetActive(false);
     }
 
     private void OnCollisionEnter(Collision other)
@@ -52,27 +57,18 @@ public class Boss : MonoBehaviour
 
     private void PlayerImpact(Player player)
     {
-        player.DecreaseHealth(_damageAmount);
+        player.Damage(_contactDamage);
     }
 
     private void ImpactFeedback()
     {
         // particles
         if (_inpactParticles != null)
-        {
             _inpactParticles = Instantiate(_inpactParticles, transform.position, Quaternion.identity);
-        }
 
         // audio
         if (_impactSound != null)
-        {
             AudioHelper.PlayClip2D(_impactSound, 1f);
-        }
-    }
-
-    private void FixedUpdate()
-    {
-        Move();
     }
 
     private void Update()
@@ -81,14 +77,17 @@ public class Boss : MonoBehaviour
             StartCoroutine(WavePattern());
         if (Input.GetKeyDown(KeyCode.Q))
             StartCoroutine(BurstPattern());
-    }
-
-    // TODO: Make virtual
-    public void Move()
-    {
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+            StartCoroutine(WarpTo(_warpLocations[0].transform.position));
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+            StartCoroutine(WarpTo(_warpLocations[1].transform.position));
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+            StartCoroutine(WarpTo(_warpLocations[2].transform.position));
+        if (Input.GetKeyDown(KeyCode.Alpha4))
+            StartCoroutine(WarpTo(_warpLocations[3].transform.position));
     }
     
-    public void DecreaseHealth(int amount)
+    public void Damage(int amount)
     {
         _currentHealth -= amount;
         UpdateHud();
@@ -128,6 +127,7 @@ public class Boss : MonoBehaviour
         _isLerping = false;
     }
 
+    /* Called when the boss dies */
     public void Kill()
     {
         gameObject.SetActive(false);
@@ -135,6 +135,45 @@ public class Boss : MonoBehaviour
         
         // play sounds
         AudioHelper.PlayClip2D(_deathNoise, 1f);
+    }
+
+    /* Boss movement for warping around the arena */
+    private IEnumerator WarpTo(Vector3 pos)
+    {
+        // Create warp indicator
+        _warpIndicator.transform.position = new Vector3(pos.x, 0.01f, pos.z);
+        _warpIndicator.SetActive(true);
+
+        // Play warp animation
+        //gameObject.SetActive(false);
+        for (int x = 0; x < 3; x++) // quick and dirty blinking animation
+        {
+            _warpIndicator.SetActive(true);
+            yield return new WaitForSecondsRealtime(0.1f);
+            _warpIndicator.SetActive(false);
+            yield return new WaitForSecondsRealtime(0.1f);
+        }
+
+        // Warp to position
+        _rb.MovePosition(new Vector3(pos.x, _rb.position.y, pos.z));
+
+        // Complete warp animation
+        gameObject.SetActive(true);
+    }
+
+    private void Attack(float startingRotation, int totalBullets, float attackSpread)
+    {
+        float angleOffset = attackSpread / totalBullets; // find the angle between each bullet
+        float spawnDistance = 2f;
+        
+        Vector3 spawnPos = new Vector3(_rb.transform.position.x, 0.5f, _rb.transform.position.z); // set the spawn pos to the correct height
+
+        for (float rot = startingRotation; rot < startingRotation + attackSpread; rot += angleOffset)
+        {
+            GameObject bullet = Instantiate(_bullet, spawnPos, Quaternion.AngleAxis(rot, Vector3.up));
+            bullet.transform.Translate(Vector3.forward * spawnDistance);
+            Physics.IgnoreCollision(bullet.transform.GetComponent<Collider>(), GetComponent<Collider>());
+        }
     }
 
     private void WaveAttack()
@@ -179,7 +218,8 @@ public class Boss : MonoBehaviour
         for (int x = 0; x < 8; x++)
         {
             yield return new WaitForSecondsRealtime(0.5f);
-            WaveAttack();
+            Attack(90f, 20, 360f);
+            //WaveAttack();
         }
     }
     
@@ -193,6 +233,7 @@ public class Boss : MonoBehaviour
         for (int x = 0; x < 5; x++)
         {
             yield return new WaitForSecondsRealtime(0.2f);
+            //Attack(startingRotation, 5, 20f);
             BurstAttack(startingRotation);
         }
     }

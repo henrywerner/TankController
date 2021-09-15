@@ -13,7 +13,7 @@ public class TankController : MonoBehaviour
 
     Rigidbody _rb = null;
     [SerializeField] GameObject _gun;
-    
+
     [SerializeField] private GameObject _bullet;
     [SerializeField] private float _fireRate;
     private bool _gunReady = true;
@@ -32,14 +32,14 @@ public class TankController : MonoBehaviour
 
         if (_xhair == null)
             print("crosshair not found");
-        
+
         _bodyRotation = Vector3.zero;
     }
 
     private void Update()
     {
         _xhair.gameObject.transform.position = Input.mousePosition; // move the crosshair the current mouse position
-        
+
         AimLoop();
     }
 
@@ -51,14 +51,16 @@ public class TankController : MonoBehaviour
 
     public void MoveTank()
     {
-        Vector3 inputRaw = new Vector3 (Input.GetAxisRaw("Horizontal"), 0f, Input.GetAxisRaw("Vertical"));
-        
-        inputRaw.Normalize (); // clamp all inputs to 1 so that way you can't diagonal strafe
+        Vector3 inputRaw = new Vector3(Input.GetAxisRaw("Horizontal"), 0f, Input.GetAxisRaw("Vertical"));
+
+        inputRaw.Normalize(); // clamp all inputs to 1 so that way you can't diagonal strafe
 
         if (inputRaw != Vector3.zero)
             _bodyRotation = Quaternion.LookRotation(inputRaw).eulerAngles;
-        
-        _rb.rotation = Quaternion.Slerp (transform.rotation, Quaternion.Euler (_bodyRotation.x, Mathf.Round (_bodyRotation.y / 45) * 45, _bodyRotation.z), 0.5f); // I took this from online
+
+        _rb.rotation = Quaternion.Slerp(transform.rotation,
+            Quaternion.Euler(_bodyRotation.x, Mathf.Round(_bodyRotation.y / 45) * 45, _bodyRotation.z),
+            0.5f); // I took this from online
 
         _rb.MovePosition(_rb.position + new Vector3(inputRaw.x * _maxSpeed, 0, inputRaw.z * _maxSpeed));
     }
@@ -67,7 +69,7 @@ public class TankController : MonoBehaviour
     {
         var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         var plane = new Plane(Vector3.up, Vector3.zero);
-        
+
         // Use raycast to convert mouse position into world position
         if (plane.Raycast(ray, out var distance))
         {
@@ -75,10 +77,6 @@ public class TankController : MonoBehaviour
             Vector3 direction = reticle - transform.position;
             float rotation = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
             _gun.transform.rotation = Quaternion.Euler(0, rotation, 0); // rotate gun towards mouse cursor
-            
-            //TODO: remove before submission
-            //print("reticle | x:" + reticle.x + " y:" + reticle.y + " z: " + reticle.z);
-            //print("direction | x:" + direction.x + " y:" + direction.y + " z: " + direction.z);
         }
     }
 
@@ -93,13 +91,13 @@ public class TankController : MonoBehaviour
     IEnumerator Shoot()
     {
         _gunReady = false;
-        
-        yield return new WaitForSecondsRealtime(_fireRate);
-        
-        // fire gun
 
+        // fire gun
         GameObject bullet = Instantiate(_bullet, _gun.transform.position, _gun.transform.rotation);
         Physics.IgnoreCollision(bullet.transform.GetComponent<Collider>(), GetComponent<Collider>());
+
+        // wait for fire rate duration 
+        yield return new WaitForSecondsRealtime(_fireRate);
 
         _gunReady = true;
     }
