@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657767, g: 0.4964139, b: 0.5748184, a: 1}
+  m_IndirectSpecularColor: {r: 0.4465778, g: 0.4964143, b: 0.5748187, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -97,8 +97,8 @@ LightmapSettings:
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 0}
-  m_LightingSettings: {fileID: 0}
+  m_LightingDataAsset: {fileID: 112000000, guid: 30779a5541b56544885527bd56e3e3f5, type: 2}
+  m_LightingSettings: {fileID: 4890085278179872738, guid: cb87d942f45fadd4980e40f154e6d0c0, type: 2}
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -715,7 +715,7 @@ MonoBehaviour:
   maxHp: 100
   currentHp: 100
   _boss: {fileID: 523965462}
-  _deathNoise: {fileID: 0}
+  _deathNoise: {fileID: 8300000, guid: af3e9d8eb32fd7747ba4e04453849ac8, type: 3}
   _healthBar: {fileID: 1438858696}
   _hurtBar: {fileID: 958324706}
 --- !u!114 &523965462 stripped
@@ -17841,9 +17841,17 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 1827676995, guid: 3d8db010d6887e646a3181af7feea891, type: 3}
+      propertyPath: maxHp
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1827676995, guid: 3d8db010d6887e646a3181af7feea891, type: 3}
       propertyPath: _deathVFX
       value: 
       objectReference: {fileID: 1291044971}
+    - target: {fileID: 1827676995, guid: 3d8db010d6887e646a3181af7feea891, type: 3}
+      propertyPath: currentHp
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 1827676995, guid: 3d8db010d6887e646a3181af7feea891, type: 3}
       propertyPath: _hudHearts.Array.data[0]
       value: 
@@ -17916,6 +17924,10 @@ PrefabInstance:
       propertyPath: _xhair
       value: 
       objectReference: {fileID: 1575507293}
+    - target: {fileID: 19319007819725117, guid: 3d8db010d6887e646a3181af7feea891, type: 3}
+      propertyPath: _gunshotSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 54f61bcc9a7f25c43926d5d332643ef9, type: 3}
     - target: {fileID: 19319007819725117, guid: 3d8db010d6887e646a3181af7feea891, type: 3}
       propertyPath: _gunshotParticles
       value: 

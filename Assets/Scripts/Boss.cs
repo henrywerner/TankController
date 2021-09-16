@@ -22,6 +22,8 @@ public class Boss : MonoBehaviour
     private int _currentDestination = 0;
     private Vector3 _movementStartPos;
     private float _movementProgress = 0f;
+    private int _bossPhase= 1;
+    private bool executingAction = false;
 
     [SerializeField] private Color _objectColor;
 
@@ -34,6 +36,8 @@ public class Boss : MonoBehaviour
     public void Start()
     {
         _movementStartPos = _rb.position;
+        
+        // Set all movement location nodes to the boss' height
         foreach (var node in _movementLocations)
         {
             var position = node.gameObject.transform.position;
@@ -87,11 +91,92 @@ public class Boss : MonoBehaviour
 
     private void FixedUpdate()
     {
+        // rotate the funny cube
         Quaternion turnOffset = Quaternion.Euler(1f, 0, 1);
-        //rb.MoveRotation(_rb.rotation * turnOffset);
         _cube.transform.localRotation = _cube.transform.localRotation * turnOffset;
+
+        // TODO: have some sort of check that changes the phase based off boss health
+
+        if (!executingAction) // this code SUCKS
+        {
+            switch (_bossPhase)
+            {
+                case 1:
+                    StartCoroutine(MoveLoop());
+                    break;
+                case 2:
+                    StartCoroutine(MoveLoop());
+                    break;
+                case 3:
+                    StartCoroutine(MoveLoop());
+                    break;
+                case 4:
+                    StartCoroutine(MoveLoop());
+                    break;
+                default:
+                    StartCoroutine(TeleportLoop());
+                    break;
+            }
+        }
         
-        Move();
+        //Move();
+    }
+
+    private IEnumerator MoveLoop()
+    {
+        executingAction = true;
+        
+        GameObject currentDestination = _movementLocations[_currentDestination];
+        
+        while (_movementProgress <= 1f)
+        {
+            _movementProgress += 1f * Time.deltaTime;
+            _rb.position = Vector3.Lerp(_movementStartPos, currentDestination.transform.position, _movementProgress);
+
+            yield return new WaitForEndOfFrame();
+        }
+
+        StartCoroutine(WavePattern());
+        yield return new WaitForSecondsRealtime(6f);
+        
+        if (_currentDestination + 1 >= _movementLocations.Length)
+            _currentDestination = 0;
+        else
+            _currentDestination++;
+
+        _movementStartPos = _rb.position;
+        _movementProgress = 0f;
+
+        _bossPhase++;
+        executingAction = false;
+    }
+
+    private IEnumerator TeleportLoop()
+    {
+        executingAction = true;
+        
+        if (_currentDestination + 1 >= _warpLocations.Length)
+            _currentDestination = 0;
+        else
+            _currentDestination++;
+        
+        GameObject currentDestination = _warpLocations[_currentDestination];
+        
+        // This is a last min addition and not the final version please don't be mad
+        // I promise I can code a lot better than this :(
+        StartCoroutine(WarpTo(currentDestination.transform.position));
+        yield return new WaitForSecondsRealtime(3f);
+
+        // nightmare nightmare nightmare nightmare nightmare nightmare nightmare 
+        StartCoroutine(BurstPattern());
+        yield return new WaitForSecondsRealtime(1f);
+        StartCoroutine(BurstPattern());
+        yield return new WaitForSecondsRealtime(1f);
+        StartCoroutine(BurstPattern());
+        yield return new WaitForSecondsRealtime(1f);
+        
+        _bossPhase++;
+        executingAction = false;
     }
 
     /* Boss movement for warping around the arena */
@@ -118,6 +203,7 @@ public class Boss : MonoBehaviour
         gameObject.SetActive(true);
     }
 
+    /*
     private void Move()
     {
         GameObject currentDestination = _movementLocations[_currentDestination];
@@ -137,6 +223,7 @@ public class Boss : MonoBehaviour
             _movementProgress = 0f;
         }
     }
+    */
 
     private void Attack(float startingRotation, int totalBullets, float attackSpread)
     {
@@ -195,7 +282,7 @@ public class Boss : MonoBehaviour
         for (int x = 0; x < 8; x++)
         {
             yield return new WaitForSecondsRealtime(0.5f);
-            Attack(90f, 20, 360f);
+            Attack(90f, 30, 360f);
             //WaveAttack();
         }
     }

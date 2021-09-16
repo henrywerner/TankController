@@ -4995,6 +4995,6 @@ MonoBehaviour:
   _rb: {fileID: 6556290226751825451}
   _parent: {fileID: 3352534600029580026, guid: 1d0f2a7447933cb46a13f8e51dd6bf9b, type: 3}
   _hitParticles: {fileID: 4788977137393698227}
-  _hitSound: {fileID: 8300000, guid: 1bae17731646fd4498754eb41adcc837, type: 3}
+  _hitSound: {fileID: 0}
   _damage: 1
   _moveSpeed: 0.15
