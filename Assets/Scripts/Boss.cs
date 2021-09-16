@@ -173,7 +173,7 @@ public class Boss : MonoBehaviour
         StartCoroutine(BurstPattern());
         yield return new WaitForSecondsRealtime(1f);
         StartCoroutine(BurstPattern());
-        yield return new WaitForSecondsRealtime(1f);
+        yield return new WaitForSecondsRealtime(0.5f);
         
         _bossPhase++;
         executingAction = false;
