@@ -1,5 +1,5 @@
-# Tank Controller
+# Basic Boss Battle
 
 https://github.com/henrywerner/TankController
 
-I apologize in advance for the unoptimized particle systems :)
+The boss movement code was written very hastily. So if you notice any really weird code, that's why.
