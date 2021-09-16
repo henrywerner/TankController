@@ -17,6 +17,11 @@ public class Boss : MonoBehaviour
     [Header("Warp")]
     [SerializeField] private GameObject _warpIndicator;
     [SerializeField] private GameObject[] _warpLocations;
+    
+    [SerializeField] private GameObject[] _movementLocations;
+    private int _currentDestination = 0;
+    private Vector3 _movementStartPos;
+    private float _movementProgress = 0f;
 
     [SerializeField] private Color _objectColor;
 
@@ -24,6 +29,17 @@ public class Boss : MonoBehaviour
     {
         _rb = GetComponent<Rigidbody>();
         _warpIndicator.SetActive(false);
+    }
+
+    public void Start()
+    {
+        _movementStartPos = _rb.position;
+        foreach (var node in _movementLocations)
+        {
+            var position = node.gameObject.transform.position;
+            Vector3 newPos = new Vector3(position.x, _rb.position.y, position.z);
+            node.gameObject.transform.position = newPos;
+        }
     }
 
     /* Damage player on contact */
@@ -74,6 +90,8 @@ public class Boss : MonoBehaviour
         Quaternion turnOffset = Quaternion.Euler(1f, 0, 1);
         //rb.MoveRotation(_rb.rotation * turnOffset);
         _cube.transform.localRotation = _cube.transform.localRotation * turnOffset;
+        
+        Move();
     }
 
     /* Boss movement for warping around the arena */
@@ -102,7 +120,22 @@ public class Boss : MonoBehaviour
 
     private void Move()
     {
-        // if (isMoving)
+        GameObject currentDestination = _movementLocations[_currentDestination];
+
+        _movementProgress += 0.01f;
+        
+        _rb.position = Vector3.Lerp(_movementStartPos, currentDestination.transform.position, _movementProgress);
+
+        if (_rb.position == currentDestination.transform.position)
+        {
+            if (_currentDestination + 1 >= _movementLocations.Length)
+                _currentDestination = 0;
+            else
+                _currentDestination++;
+
+            _movementStartPos = _rb.position;
+            _movementProgress = 0f;
+        }
     }
 
     private void Attack(float startingRotation, int totalBullets, float attackSpread)
@@ -169,7 +202,7 @@ public class Boss : MonoBehaviour
     
     IEnumerator BurstPattern()
     {
-        Player player = FindObjectOfType<Player>();
+        TankController player = FindObjectOfType<TankController>();
         Vector3 direction = (player.transform.position - transform.position).normalized;
         Quaternion lookRotation = Quaternion.LookRotation(direction);
         float startingRotation = lookRotation.eulerAngles.y;
