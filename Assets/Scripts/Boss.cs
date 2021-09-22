@@ -2,6 +2,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 public class Boss : MonoBehaviour
 {
@@ -22,7 +23,7 @@ public class Boss : MonoBehaviour
     private int _currentDestination = 0;
     private Vector3 _movementStartPos;
     private float _movementProgress = 0f;
-    private int _bossPhase= 1;
+    private int _bossPattern= 1;
     private bool executingAction = false;
 
     [SerializeField] private Color _objectColor;
@@ -73,22 +74,6 @@ public class Boss : MonoBehaviour
             AudioHelper.PlayClip2D(_impactSound, 1f);
     }
 
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.E))
-            StartCoroutine(WavePattern());
-        if (Input.GetKeyDown(KeyCode.Q))
-            StartCoroutine(BurstPattern());
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-            StartCoroutine(WarpTo(_warpLocations[0].transform.position));
-        if (Input.GetKeyDown(KeyCode.Alpha2))
-            StartCoroutine(WarpTo(_warpLocations[1].transform.position));
-        if (Input.GetKeyDown(KeyCode.Alpha3))
-            StartCoroutine(WarpTo(_warpLocations[2].transform.position));
-        if (Input.GetKeyDown(KeyCode.Alpha4))
-            StartCoroutine(WarpTo(_warpLocations[3].transform.position));
-    }
-
     private void FixedUpdate()
     {
         // rotate the funny cube
@@ -99,84 +84,27 @@ public class Boss : MonoBehaviour
 
         if (!executingAction) // this code SUCKS
         {
-            switch (_bossPhase)
+            int prevPattern = _bossPattern;
+            while (prevPattern == _bossPattern)
+            {
+                _bossPattern = Random.Range(1, 4);
+            }
+
+            switch (_bossPattern)
             {
                 case 1:
-                    StartCoroutine(MoveLoop());
+                    StartCoroutine(BasicWavePattern());
                     break;
                 case 2:
-                    StartCoroutine(MoveLoop());
-                    break;
-                case 3:
-                    StartCoroutine(MoveLoop());
-                    break;
-                case 4:
-                    StartCoroutine(MoveLoop());
+                    StartCoroutine(CoolPattern());
                     break;
                 default:
-                    StartCoroutine(TeleportLoop());
+                    StartCoroutine(WarpBurstPattern());
                     break;
             }
         }
         
         //Move();
-    }
-
-    private IEnumerator MoveLoop()
-    {
-        executingAction = true;
-        
-        GameObject currentDestination = _movementLocations[_currentDestination];
-        
-        while (_movementProgress <= 1f)
-        {
-            _movementProgress += 1f * Time.deltaTime;
-            _rb.position = Vector3.Lerp(_movementStartPos, currentDestination.transform.position, _movementProgress);
-
-            yield return new WaitForEndOfFrame();
-        }
-
-        StartCoroutine(WavePattern());
-        yield return new WaitForSecondsRealtime(6f);
-        
-        if (_currentDestination + 1 >= _movementLocations.Length)
-            _currentDestination = 0;
-        else
-            _currentDestination++;
-
-        _movementStartPos = _rb.position;
-        _movementProgress = 0f;
-
-        _bossPhase++;
-        executingAction = false;
-    }
-
-    private IEnumerator TeleportLoop()
-    {
-        executingAction = true;
-        
-        if (_currentDestination + 1 >= _warpLocations.Length)
-            _currentDestination = 0;
-        else
-            _currentDestination++;
-        
-        GameObject currentDestination = _warpLocations[_currentDestination];
-        
-        // This is a last min addition and not the final version please don't be mad
-        // I promise I can code a lot better than this :(
-        StartCoroutine(WarpTo(currentDestination.transform.position));
-        yield return new WaitForSecondsRealtime(3f);
-
-        // nightmare nightmare nightmare nightmare nightmare nightmare nightmare 
-        StartCoroutine(BurstPattern());
-        yield return new WaitForSecondsRealtime(1f);
-        StartCoroutine(BurstPattern());
-        yield return new WaitForSecondsRealtime(1f);
-        StartCoroutine(BurstPattern());
-        yield return new WaitForSecondsRealtime(0.5f);
-        
-        _bossPhase++;
-        executingAction = false;
     }
 
     /* Boss movement for warping around the arena */
@@ -203,48 +131,29 @@ public class Boss : MonoBehaviour
         gameObject.SetActive(true);
     }
 
-    /*
-    private void Move()
+    /* Boss movement for lerping between two spots*/
+    private IEnumerator Move(Vector3 start, Vector3 destination, float duration)
     {
-        GameObject currentDestination = _movementLocations[_currentDestination];
-
-        _movementProgress += 0.01f;
+        float time = 0;
+        duration += Time.deltaTime;
         
-        _rb.position = Vector3.Lerp(_movementStartPos, currentDestination.transform.position, _movementProgress);
-
-        if (_rb.position == currentDestination.transform.position)
+        while (time <= duration)
         {
-            if (_currentDestination + 1 >= _movementLocations.Length)
-                _currentDestination = 0;
-            else
-                _currentDestination++;
+        
+            float t = time / duration;
+            t = t * t * (3f - 2f * t);
 
-            _movementStartPos = _rb.position;
-            _movementProgress = 0f;
+            transform.position = Vector3.Lerp(start, destination, t);
+            time += Time.deltaTime;
+
+            yield return new WaitForEndOfFrame();
         }
+        
+        _movementProgress = 0f;
     }
-    */
 
     private void Attack(float startingRotation, int totalBullets, float attackSpread)
     {
-        float angleOffset = attackSpread / totalBullets; // find the angle between each bullet
-        float spawnDistance = 2f;
-        
-        Vector3 spawnPos = new Vector3(_rb.transform.position.x, 0.5f, _rb.transform.position.z); // set the spawn pos to the correct height
-
-        for (float rot = startingRotation; rot < startingRotation + attackSpread; rot += angleOffset)
-        {
-            GameObject bullet = Instantiate(_bullet, spawnPos, Quaternion.AngleAxis(rot, Vector3.up));
-            bullet.transform.Translate(Vector3.forward * spawnDistance);
-            Physics.IgnoreCollision(bullet.transform.GetComponent<Collider>(), GetComponent<Collider>());
-        }
-    }
-
-    private void WaveAttack()
-    {
-        float startingRotation = 90;
-        int totalBullets = 20;
-        float attackSpread = 360;
         float angleOffset = attackSpread / totalBullets; // find the angle between each bullet
         float spawnDistance = 2f;
         
@@ -261,8 +170,8 @@ public class Boss : MonoBehaviour
     private void BurstAttack(float rotation)
     {
         float startingRotation = rotation;
-        int totalBullets = 5;
-        float attackSpread = 20;
+        int totalBullets = 7;
+        float attackSpread = 23;
         float angleOffset = attackSpread / totalBullets; // find the angle between each bullet
         float spawnDistance = 4f;
         startingRotation -= 2 * angleOffset;
@@ -277,28 +186,92 @@ public class Boss : MonoBehaviour
         }
     }
 
-    IEnumerator WavePattern()
+    IEnumerator BasicWavePattern()
     {
+        executingAction = true;
+
+        // Find new destination from within the pool of movement locations
+        if (_currentDestination + 1 >= _movementLocations.Length)
+            _currentDestination = 0;
+        else
+            _currentDestination++;
+        
+        GameObject currentDestination = _movementLocations[_currentDestination];
+
+        // Wait for boss to move to destination
+        yield return StartCoroutine(Move(_rb.position, currentDestination.transform.position, 2f));
+
+        // Attack
         for (int x = 0; x < 8; x++)
         {
             yield return new WaitForSecondsRealtime(0.5f);
             Attack(90f, 30, 360f);
-            //WaveAttack();
         }
+
+        executingAction = false;
     }
     
-    IEnumerator BurstPattern()
+    IEnumerator CoolPattern()
     {
-        TankController player = FindObjectOfType<TankController>();
-        Vector3 direction = (player.transform.position - transform.position).normalized;
-        Quaternion lookRotation = Quaternion.LookRotation(direction);
-        float startingRotation = lookRotation.eulerAngles.y;
+        executingAction = true;
         
-        for (int x = 0; x < 5; x++)
+        yield return new WaitForSecondsRealtime(1f);
+        
+        TankController player = FindObjectOfType<TankController>();
+        
+        // Wait until boss has moved to player pos
+        yield return StartCoroutine(Move(_rb.transform.position, player.transform.position, 3f));
+        
+        for (int x = 0; x < 10; x++)
         {
-            yield return new WaitForSecondsRealtime(0.2f);
-            //Attack(startingRotation, 5, 20f);
-            BurstAttack(startingRotation);
+            yield return new WaitForSecondsRealtime(0.6f);
+            Attack(90f + (x % 2 == 0 ? 0f : 7.5f), 24, 360f);
         }
+
+        executingAction = false;
+    }
+    
+    IEnumerator WarpBurstPattern()
+    {
+        executingAction = true;
+
+        for (int z = 0; z < 3; z++)
+        {
+
+            // Find new destination from within pool of warp locations
+            if (_currentDestination + 1 >= _warpLocations.Length)
+                _currentDestination = 0;
+            else
+                _currentDestination++;
+
+            GameObject currentDestination = _warpLocations[_currentDestination];
+
+            // Wait for warp movement to complete
+            yield return StartCoroutine(WarpTo(currentDestination.transform.position));
+
+            yield return new WaitForSecondsRealtime(2f);
+
+            TankController player = FindObjectOfType<TankController>(); // Find player
+
+            for (int y = 0; y < 1; y++)
+            {
+                Vector3 direction =
+                    (player.transform.position - transform.position).normalized; // Get direction facing player
+                Quaternion lookRotation = Quaternion.LookRotation(direction);
+                float startingRotation = lookRotation.eulerAngles.y;
+
+                for (int x = 0; x < 3; x++)
+                {
+                    BurstAttack(startingRotation);
+                    yield return new WaitForSecondsRealtime(0.1f);
+                }
+
+                yield return new WaitForSecondsRealtime(0.7f);
+            }
+        }
+        
+        yield return new WaitForSecondsRealtime(2f);
+
+        executingAction = false;
     }
 }

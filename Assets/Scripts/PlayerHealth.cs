@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 
 public class PlayerHealth : Health
@@ -7,14 +8,8 @@ public class PlayerHealth : Health
     [SerializeField] private AudioClip _deathNoise;
     [SerializeField] private ParticleSystem _deathVFX;
     [SerializeField] private Material[] _materials;
-    [SerializeField] private GameObject[] _hudHearts;
     private bool _isInvincible;
 
-    private void Start()
-    {
-        UpdateHud();
-    }
-    
     public override void Kill()
     {
         if (_isInvincible) return; // Ignore if the player is invincible
@@ -33,11 +28,9 @@ public class PlayerHealth : Health
     {
         if (_isInvincible) return; // Ignore if the player is invincible
 
-        currentHp -= damage;
-        UpdateHud();
+        base.Damage(damage);
+        
         AudioHelper.PlayClip2D(_hurtNoise, 1f);
-        if (currentHp <= 0)
-            Kill();
         StartCoroutine(Iframes());
     }
     
@@ -53,24 +46,5 @@ public class PlayerHealth : Health
             mat.SetInt("shaderActive", 0);
         
         _isInvincible = false;
-    }
-
-    private void UpdateHud()
-    {
-        if (_hudHearts.Length < maxHp)
-            print("Warning: total hudHearts is less than max health.");
-
-        int x = 0;
-        foreach (var heart in _hudHearts)
-        {
-            x++;
-            if (x > currentHp)
-            {
-                heart.SetActive(false);
-                continue;
-            }
-
-            heart.SetActive(true);
-        }
     }
 }

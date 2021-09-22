@@ -716,8 +716,6 @@ MonoBehaviour:
   currentHp: 100
   _boss: {fileID: 523965462}
   _deathNoise: {fileID: 8300000, guid: af3e9d8eb32fd7747ba4e04453849ac8, type: 3}
-  _healthBar: {fileID: 1438858696}
-  _hurtBar: {fileID: 958324706}
 --- !u!114 &523965462 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3352534600029580031, guid: 1d0f2a7447933cb46a13f8e51dd6bf9b, type: 3}
@@ -1145,6 +1143,17 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 3352534599897248301, guid: 1d0f2a7447933cb46a13f8e51dd6bf9b, type: 3}
   m_PrefabInstance: {fileID: 3352534600122988595}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &930329106 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1827676995, guid: 3d8db010d6887e646a3181af7feea891, type: 3}
+  m_PrefabInstance: {fileID: 19319008468371785}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85b203b4285a4a608d0222c7c2c11ff6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &956275502
 GameObject:
   m_ObjectHideFlags: 0
@@ -12425,6 +12434,7 @@ RectTransform:
   - {fileID: 1575507291}
   - {fileID: 956275503}
   - {fileID: 1210775778}
+  - {fileID: 1839242749}
   m_Father: {fileID: 0}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -12767,6 +12777,64 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1823902109}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1839242748
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1839242749}
+  - component: {fileID: 1839242750}
+  m_Layer: 5
+  m_Name: UI Controller
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1839242749
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1839242748}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1762168268}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1839242750
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1839242748}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e277d521c68e85458c391be0440d57d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _playerHealth: {fileID: 930329106}
+  _bossHealth: {fileID: 523965461}
+  _playerHearts:
+  - {fileID: 544382764}
+  - {fileID: 1669304825}
+  - {fileID: 573515434}
+  - {fileID: 1813760600}
+  - {fileID: 573213001}
+  _bossHealthBar: {fileID: 1438858696}
+  _bossHurtBar: {fileID: 958324706}
 --- !u!1 &1912341754
 GameObject:
   m_ObjectHideFlags: 0
@@ -17932,6 +18000,14 @@ PrefabInstance:
       propertyPath: _gunshotParticles
       value: 
       objectReference: {fileID: 19319008468371786}
+    - target: {fileID: 19319008220587697, guid: 3d8db010d6887e646a3181af7feea891, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 19319009193785188, guid: 3d8db010d6887e646a3181af7feea891, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7074215988169897298, guid: 3d8db010d6887e646a3181af7feea891, type: 3}
       propertyPath: playOnAwake
       value: 0
