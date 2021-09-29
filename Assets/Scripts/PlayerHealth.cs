@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class PlayerHealth : Health
 {
@@ -8,7 +9,10 @@ public class PlayerHealth : Health
     [SerializeField] private AudioClip _deathNoise;
     [SerializeField] private ParticleSystem _deathVFX;
     [SerializeField] private Material[] _materials;
+    [SerializeField] private Image _redScreen;
     private bool _isInvincible;
+
+    public event Action OnPlayerHurt;
 
     public override void Kill()
     {
@@ -32,8 +36,9 @@ public class PlayerHealth : Health
         
         AudioHelper.PlayClip2D(_hurtNoise, 1f);
         StartCoroutine(Iframes());
+        OnPlayerHurt?.Invoke();
     }
-    
+
     private IEnumerator Iframes()
     {
         _isInvincible = true;

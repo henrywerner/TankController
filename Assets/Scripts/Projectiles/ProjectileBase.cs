@@ -23,7 +23,7 @@ public abstract class ProjectileBase : MonoBehaviour
     
     [Header("Stats")]
     [SerializeField] private int _damage;
-    [SerializeField] private float _moveSpeed = 0.3f;
+    [SerializeField] public float MoveSpeed = 0.3f;
     
     private void Awake()
     {
@@ -39,7 +39,7 @@ public abstract class ProjectileBase : MonoBehaviour
 
     protected virtual void Movement(Rigidbody rb)
     {
-        Vector3 moveOffset = transform.forward * _moveSpeed;
+        Vector3 moveOffset = transform.forward * MoveSpeed;
         rb.MovePosition(rb.position + moveOffset);
     }
 
@@ -47,18 +47,18 @@ public abstract class ProjectileBase : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Bullet"))
         {
-            print("hit self");
+            //print("hit self");
             //Physics.IgnoreCollision(other.gameObject.GetComponent<Collider>(), GetComponent<Collider>());
         }
         else if (other.gameObject.CompareTag(_parent.tag))
         {
             //Physics.IgnoreCollision(_parent.GetComponent<Collider>(), _rb.GetComponent<Collider>());
-            print("hit parent: " + other.gameObject.name);
+            //print("hit parent: " + other.gameObject.name);
             //Physics.IgnoreCollision(other.gameObject.GetComponent<Collider>(), GetComponent<Collider>());
         }
         else
         {
-            print("HIT OTHER: "  + other.gameObject.name);
+            //print("HIT OTHER: "  + other.gameObject.name);
             IDamageable obj = other.gameObject.GetComponent<IDamageable>();
             obj?.Damage(_damage); // only apply damage if obj isn't null
             Feedback(); // spawn particles and sfx

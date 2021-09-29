@@ -8,6 +8,13 @@ public class BossHealth : Health
     [SerializeField] private Boss _boss;
     [SerializeField] private AudioClip _deathNoise;
 
+    public override void Damage(int damage)
+    {
+        base.Damage(damage);
+        if (currentHp <= maxHp / 3)
+            _boss.OnLowHealth();
+    }
+
     public override void Kill()
     {
         gameObject.SetActive(false);

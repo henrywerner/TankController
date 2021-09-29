@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
@@ -14,19 +15,30 @@ public class Boss : MonoBehaviour
     [Header("Assets")]
     [SerializeField] private GameObject _cube;
     [SerializeField] private GameObject _bullet;
+    [SerializeField] private AudioClip _shootSound;
 
     [Header("Warp")]
+    [SerializeField] private AudioClip _warpSound;
     [SerializeField] private GameObject _warpIndicator;
     [SerializeField] private GameObject[] _warpLocations;
     
+    [Header("Movement")]
     [SerializeField] private GameObject[] _movementLocations;
+    [SerializeField] private AudioClip _moveSound2sec, _moveSound3sec;
     private int _currentDestination = 0;
     private Vector3 _movementStartPos;
     private float _movementProgress = 0f;
+    
     private int _bossPattern= 1;
+    private int _bossPhase= 1;
     private bool executingAction = false;
 
     [SerializeField] private Color _objectColor;
+    
+    [Header("Barrage")]
+    [SerializeField] private GameObject[] _barrageSubpatterns;
+    [SerializeField] private GameObject _BarrageBossLocation;
+    [SerializeField] private AudioClip _BarrageWarningSound;
 
     private void Awake()
     {
@@ -37,7 +49,7 @@ public class Boss : MonoBehaviour
     public void Start()
     {
         _movementStartPos = _rb.position;
-        
+
         // Set all movement location nodes to the boss' height
         foreach (var node in _movementLocations)
         {
@@ -45,6 +57,12 @@ public class Boss : MonoBehaviour
             Vector3 newPos = new Vector3(position.x, _rb.position.y, position.z);
             node.gameObject.transform.position = newPos;
         }
+    }
+
+    public void OnLowHealth()
+    {
+        _bossPhase = 2;
+        _bossPattern = 1;
     }
 
     /* Damage player on contact */
@@ -74,15 +92,37 @@ public class Boss : MonoBehaviour
             AudioHelper.PlayClip2D(_impactSound, 1f);
     }
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            _bossPhase = 2;
+        }
+    }
+
     private void FixedUpdate()
     {
         // rotate the funny cube
         Quaternion turnOffset = Quaternion.Euler(1f, 0, 1);
         _cube.transform.localRotation = _cube.transform.localRotation * turnOffset;
 
-        // TODO: have some sort of check that changes the phase based off boss health
-
-        if (!executingAction) // this code SUCKS
+        if (_bossPhase == 2)
+        {
+            if (!executingAction)
+            {
+                if (_bossPattern == 1)
+                {
+                    StartCoroutine(DeathBarragePattern(_barrageSubpatterns[0]));
+                    _bossPattern++;
+                }
+                else
+                {
+                    StartCoroutine(DeathBarragePattern(_barrageSubpatterns[1]));
+                    _bossPattern = 1;
+                }
+            }
+        }
+        else if (!executingAction) // this code SUCKS
         {
             int prevPattern = _bossPattern;
             while (prevPattern == _bossPattern)
@@ -118,6 +158,7 @@ public class Boss : MonoBehaviour
         //gameObject.SetActive(false);
         for (int x = 0; x < 3; x++) // quick and dirty blinking animation
         {
+            AudioHelper.PlayClip2D(_warpSound, 1f);
             _warpIndicator.SetActive(true);
             yield return new WaitForSecondsRealtime(0.1f);
             _warpIndicator.SetActive(false);
@@ -152,6 +193,12 @@ public class Boss : MonoBehaviour
         _movementProgress = 0f;
     }
 
+    private void AttackFeedback()
+    {
+        if (_shootSound != null)
+            AudioHelper.PlayClip2D(_shootSound, 1f);
+    }
+
     private void Attack(float startingRotation, int totalBullets, float attackSpread)
     {
         float angleOffset = attackSpread / totalBullets; // find the angle between each bullet
@@ -165,6 +212,27 @@ public class Boss : MonoBehaviour
             bullet.transform.Translate(Vector3.forward * spawnDistance);
             Physics.IgnoreCollision(bullet.transform.GetComponent<Collider>(), GetComponent<Collider>());
         }
+        
+        AttackFeedback();
+    }
+    
+    private void AttackFlat(Vector3 plane, float startingRotation, int totalBullets, float attackWidth, float projectileSpeed)
+    {
+        float distanceOffset = attackWidth / totalBullets; // find the distance between each bullet
+        float spawnDistance = 0f;
+        
+        Vector3 startPos = new Vector3(plane.x - attackWidth / 2, 0.5f, 14.6f); // y and z coords are hardcoded
+
+        for (float pos = 0; pos <= attackWidth; pos += distanceOffset)
+        {
+            Vector3 spawnPos = startPos;
+            spawnPos.x += pos;
+            GameObject bullet = Instantiate(_bullet, spawnPos, Quaternion.AngleAxis(startingRotation, Vector3.up));
+            bullet.GetComponent<EnemyBullet>().MoveSpeed = projectileSpeed;
+            Physics.IgnoreCollision(bullet.transform.GetComponent<Collider>(), GetComponent<Collider>());
+        }
+        
+        AttackFeedback();
     }
     
     private void BurstAttack(float rotation)
@@ -184,6 +252,8 @@ public class Boss : MonoBehaviour
             bullet.transform.Translate(Vector3.forward * spawnDistance);
             Physics.IgnoreCollision(bullet.transform.GetComponent<Collider>(), GetComponent<Collider>());
         }
+        
+        AttackFeedback();
     }
 
     IEnumerator BasicWavePattern()
@@ -199,6 +269,7 @@ public class Boss : MonoBehaviour
         GameObject currentDestination = _movementLocations[_currentDestination];
 
         // Wait for boss to move to destination
+        AudioHelper.PlayClip2D(_moveSound2sec, 1f);
         yield return StartCoroutine(Move(_rb.position, currentDestination.transform.position, 2f));
 
         // Attack
@@ -220,6 +291,7 @@ public class Boss : MonoBehaviour
         TankController player = FindObjectOfType<TankController>();
         
         // Wait until boss has moved to player pos
+        AudioHelper.PlayClip2D(_moveSound3sec, 1f);
         yield return StartCoroutine(Move(_rb.transform.position, player.transform.position, 3f));
         
         for (int x = 0; x < 10; x++)
@@ -271,6 +343,52 @@ public class Boss : MonoBehaviour
         }
         
         yield return new WaitForSecondsRealtime(2f);
+
+        executingAction = false;
+    }
+
+    IEnumerator DeathBarragePattern(GameObject subpattern)
+    {
+        executingAction = true;
+
+        //GameObject[] subpatternPlanes = subpattern.GetComponentsInChildren<GameObject>();
+        List<GameObject> subpatternPlanes = new List<GameObject>();
+
+        for (int i = 0; i < subpattern.transform.childCount; i++)
+            subpatternPlanes.Add(subpattern.transform.GetChild(i).gameObject);
+        
+        // move to position
+        AudioHelper.PlayClip2D(_moveSound3sec, 1f);
+        yield return StartCoroutine(Move(_rb.position, _BarrageBossLocation.transform.position, 3f));
+        
+        // Play siren noise
+        AudioHelper.PlayClip2D(_BarrageWarningSound, 0.8f);
+        
+        // show indicators
+        foreach (var plane in subpatternPlanes)
+            plane.SetActive(true);
+        
+        // wait
+        yield return new WaitForSecondsRealtime(4f);
+        
+        // hide indicators
+        foreach (var plane in subpatternPlanes)
+            plane.SetActive(false);
+
+
+        float duration = 0.05f * 30 + 0.5f;
+        StartCoroutine(CameraShake.current.Shake(duration, 0.5f));
+        for (int bulletCount = 0; bulletCount < 60; bulletCount++)
+        {
+            foreach (var plane in subpatternPlanes)
+            {
+                //if (!plane.activeSelf) continue;
+                float width = plane.GetComponent<Renderer>().bounds.size.x;
+                //Debug.Log(plane.name + " bounds: " + width);
+                AttackFlat(plane.transform.position, 180f, 15, width, 2f);
+            }
+            yield return new WaitForSecondsRealtime(0.025f);
+        }
 
         executingAction = false;
     }

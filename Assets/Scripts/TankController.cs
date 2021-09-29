@@ -102,7 +102,7 @@ public class TankController : MonoBehaviour
         
         // play noise
         AudioHelper.PlayClip2D(_gunshotSound, 0.8f);
-        
+
         // vfx
         if (_gunshotParticles != null)
         {
@@ -112,6 +112,8 @@ public class TankController : MonoBehaviour
             
             _gunshotParticles.Play();
         }
+
+        StartCoroutine(CameraShake.current.Shake(_fireRate, 0.1f));
 
         // wait for fire rate duration 
         yield return new WaitForSecondsRealtime(_fireRate);

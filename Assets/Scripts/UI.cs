@@ -12,6 +12,7 @@ public class UI : MonoBehaviour
 
     [Header("Player HealthBar")]
     [SerializeField] private GameObject[] _playerHearts;
+    [SerializeField] private Image _redScreen;
     
     [Header("Boss HealthBar")]
     [SerializeField] private Image _bossHealthBar;
@@ -21,7 +22,10 @@ public class UI : MonoBehaviour
     private void Start()
     {
         _playerHealth.OnHpChanged += UpdateHealthPlayer;
+        _playerHealth.OnPlayerHurt += () => StartCoroutine(RedScreen());
         _bossHealth.OnHpChanged += UpdateHealthBoss;
+        
+        _redScreen.color = new Color(1, 1, 1, 0);
     }
     
     private void UpdateHealthPlayer()
@@ -50,6 +54,25 @@ public class UI : MonoBehaviour
 
         if (!_bossHpIsLerping)
             StartCoroutine(UpdateHurtBar());
+    }
+
+    IEnumerator RedScreen()
+    {
+        float time = 0;
+        float duration = 1.3f;
+        float alpha = 0f;
+        
+        _redScreen.color = new Color(1, 1, 1, 0);
+
+        while (time < duration)
+        {
+            alpha = (1 - Math.Abs(Mathf.Lerp(-1, 1, time / duration))) * 0.6f;
+            _redScreen.color = new Color(1, 1, 1, alpha);
+            time += Time.deltaTime;
+            yield return null;
+        }
+
+        _redScreen.color = new Color(1, 1, 1, 0);
     }
 
     IEnumerator UpdateHurtBar()

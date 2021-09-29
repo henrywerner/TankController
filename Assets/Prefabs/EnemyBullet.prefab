@@ -4997,4 +4997,4 @@ MonoBehaviour:
   _hitParticles: {fileID: 4788977137393698227}
   _hitSound: {fileID: 0}
   _damage: 1
-  _moveSpeed: 0.15
+  MoveSpeed: 0.15
