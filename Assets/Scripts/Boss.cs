@@ -8,37 +8,47 @@ using Random = UnityEngine.Random;
 public class Boss : MonoBehaviour
 {
     [SerializeField] private int _contactDamage = 1;
-    [SerializeField] private ParticleSystem _inpactParticles;
-    [SerializeField] private AudioClip _impactSound;
     private Rigidbody _rb;
+
+    [Header("Materials")] 
+    [SerializeField] private Material _cubeMaterial;
+    [SerializeField] private Material _whiteMaterial;
     
-    [Header("Assets")]
-    [SerializeField] private GameObject _cube;
+    [Header("Bullets")]
     [SerializeField] private GameObject _bullet;
     [SerializeField] private AudioClip _shootSound;
+    
+    [Header("Cubes")]
+    [SerializeField] private GameObject _bigCube;
+    private Renderer _bigCubeRenderer;
+    [SerializeField] private GameObject[] _outerCubes;
+    private Renderer[] _outerCubesRenderer;
+    [SerializeField] private AudioClip _outerCubeHitSound;
+    [SerializeField] private AudioClip _outerCubeBreakSound;
 
     [Header("Warp")]
+    [SerializeField] private AudioClip _warpAlertSound;
     [SerializeField] private AudioClip _warpSound;
     [SerializeField] private GameObject _warpIndicator;
     [SerializeField] private GameObject[] _warpLocations;
-    
-    [Header("Movement")]
-    [SerializeField] private GameObject[] _movementLocations;
-    [SerializeField] private AudioClip _moveSound2sec, _moveSound3sec;
-    private int _currentDestination = 0;
-    private Vector3 _movementStartPos;
-    private float _movementProgress = 0f;
-    
-    private int _bossPattern= 1;
-    private int _bossPhase= 1;
-    private bool executingAction = false;
-
-    [SerializeField] private Color _objectColor;
     
     [Header("Barrage")]
     [SerializeField] private GameObject[] _barrageSubpatterns;
     [SerializeField] private GameObject _BarrageBossLocation;
     [SerializeField] private AudioClip _BarrageWarningSound;
+    
+    [Header("Movement")]
+    [SerializeField] private GameObject[] _movementLocations;
+    [SerializeField] private AudioClip _moveSound2sec, _moveSound3sec;
+    private int _currentDestination = 0;
+    private float _movementProgress = 0f;
+    
+    private int _bossPattern= 1;
+    private int _bossPhase= 1;
+    private bool _executingAction = false;
+
+    [SerializeField] private Color _objectColor;
+    
 
     private void Awake()
     {
@@ -48,8 +58,14 @@ public class Boss : MonoBehaviour
 
     public void Start()
     {
-        _movementStartPos = _rb.position;
-
+        // Find material renderers
+        _bigCubeRenderer = _bigCube.GetComponent<Renderer>();
+        _outerCubesRenderer = new Renderer[_outerCubes.Length];
+        for (int r = 0; r < _outerCubes.Length; r++)
+        {
+            _outerCubesRenderer[r] = _outerCubes[r].GetComponent<Renderer>();
+        }
+        
         // Set all movement location nodes to the boss' height
         foreach (var node in _movementLocations)
         {
@@ -57,43 +73,16 @@ public class Boss : MonoBehaviour
             Vector3 newPos = new Vector3(position.x, _rb.position.y, position.z);
             node.gameObject.transform.position = newPos;
         }
+
+        // Set barrage attack location node to the boss' height
+        var position1 = _BarrageBossLocation.gameObject.transform.position;
+        Vector3 newPos1 = new Vector3(position1.x, _rb.position.y, position1.z);
+        _BarrageBossLocation.gameObject.transform.position = newPos1;
     }
-
-    public void OnLowHealth()
-    {
-        _bossPhase = 2;
-        _bossPattern = 1;
-    }
-
-    /* Damage player on contact */
-    private void OnCollisionEnter(Collision other)
-    {
-        Player player = other.gameObject.GetComponent<Player>();
-        if (player != null)
-        {
-            PlayerImpact(player);
-            ImpactFeedback();
-        }
-    }
-
-    private void PlayerImpact(Player player)
-    {
-        player.Damage(_contactDamage);
-    }
-
-    private void ImpactFeedback()
-    {
-        // particles
-        if (_inpactParticles != null)
-            _inpactParticles = Instantiate(_inpactParticles, transform.position, Quaternion.identity);
-
-        // audio
-        if (_impactSound != null)
-            AudioHelper.PlayClip2D(_impactSound, 1f);
-    }
-
+    
     private void Update()
     {
+        // Dev key for testing final phase
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             _bossPhase = 2;
@@ -104,11 +93,11 @@ public class Boss : MonoBehaviour
     {
         // rotate the funny cube
         Quaternion turnOffset = Quaternion.Euler(1f, 0, 1);
-        _cube.transform.localRotation = _cube.transform.localRotation * turnOffset;
+        _bigCube.transform.localRotation = _bigCube.transform.localRotation * turnOffset;
 
         if (_bossPhase == 2)
         {
-            if (!executingAction)
+            if (!_executingAction)
             {
                 if (_bossPattern == 1)
                 {
@@ -122,7 +111,7 @@ public class Boss : MonoBehaviour
                 }
             }
         }
-        else if (!executingAction) // this code SUCKS
+        else if (!_executingAction)
         {
             int prevPattern = _bossPattern;
             while (prevPattern == _bossPattern)
@@ -143,8 +132,62 @@ public class Boss : MonoBehaviour
                     break;
             }
         }
+    }
+
+    public void OnLowHealth()
+    {
+        _bossPhase = 2;
+        _bossPattern = 1;
+    }
+
+    public void OnDamage(int cubeNumber)
+    {
+        StartCoroutine(cubeNumber == -1 ? OnDamageMainCube() : OnDamageOuterCube(cubeNumber));
+    }
+
+    IEnumerator OnDamageOuterCube(int cubeNumber)
+    {
+        if (cubeNumber >= _outerCubes.Length) yield break;
         
-        //Move();
+        AudioHelper.PlayClip2D(_outerCubeHitSound, 1f); // play hitsound
+        
+        
+        _outerCubesRenderer[cubeNumber].material = _whiteMaterial; // swap material to white
+        yield return new WaitForEndOfFrame();
+        yield return new WaitForFixedUpdate();
+        _outerCubesRenderer[cubeNumber].material = _cubeMaterial; // swap material back to normal
+    }
+
+    IEnumerator OnDamageMainCube()
+    {
+        AudioHelper.PlayClip2D(_outerCubeHitSound, 1f); // play hitsound
+        
+        _bigCubeRenderer.material = _whiteMaterial; // swap material to white
+        yield return new WaitForEndOfFrame();
+        yield return new WaitForFixedUpdate();
+        _bigCubeRenderer.material = _cubeMaterial; // swap material back to normal
+    }
+
+    public void DestroyOuterCube(int cubeNumber)
+    {
+        if (cubeNumber >= _outerCubes.Length) return;
+        AudioHelper.PlayClip2D(_outerCubeBreakSound, 1f);
+        _outerCubes[cubeNumber].SetActive(false);
+    }
+
+    /* Damage player on contact */
+    private void OnCollisionEnter(Collision other)
+    {
+        Player player = other.gameObject.GetComponent<Player>();
+        if (player != null)
+        {
+            PlayerImpact(player);
+        }
+    }
+
+    private void PlayerImpact(Player player)
+    {
+        player.Damage(_contactDamage);
     }
 
     /* Boss movement for warping around the arena */
@@ -155,10 +198,9 @@ public class Boss : MonoBehaviour
         _warpIndicator.SetActive(true);
 
         // Play warp animation
-        //gameObject.SetActive(false);
         for (int x = 0; x < 3; x++) // quick and dirty blinking animation
         {
-            AudioHelper.PlayClip2D(_warpSound, 1f);
+            AudioHelper.PlayClip2D(_warpAlertSound, 1f);
             _warpIndicator.SetActive(true);
             yield return new WaitForSecondsRealtime(0.1f);
             _warpIndicator.SetActive(false);
@@ -167,6 +209,9 @@ public class Boss : MonoBehaviour
 
         // Warp to position
         _rb.MovePosition(new Vector3(pos.x, _rb.position.y, pos.z));
+        
+        // Play sound effect
+        AudioHelper.PlayClip2D(_warpSound, 1f);
 
         // Complete warp animation
         gameObject.SetActive(true);
@@ -258,7 +303,7 @@ public class Boss : MonoBehaviour
 
     IEnumerator BasicWavePattern()
     {
-        executingAction = true;
+        _executingAction = true;
 
         // Find new destination from within the pool of movement locations
         if (_currentDestination + 1 >= _movementLocations.Length)
@@ -273,18 +318,18 @@ public class Boss : MonoBehaviour
         yield return StartCoroutine(Move(_rb.position, currentDestination.transform.position, 2f));
 
         // Attack
-        for (int x = 0; x < 8; x++)
+        for (int x = 0; x < 16; x++)
         {
-            yield return new WaitForSecondsRealtime(0.5f);
+            yield return new WaitForSecondsRealtime(0.25f);
             Attack(90f, 30, 360f);
         }
 
-        executingAction = false;
+        _executingAction = false;
     }
     
     IEnumerator CoolPattern()
     {
-        executingAction = true;
+        _executingAction = true;
         
         yield return new WaitForSecondsRealtime(1f);
         
@@ -300,12 +345,12 @@ public class Boss : MonoBehaviour
             Attack(90f + (x % 2 == 0 ? 0f : 7.5f), 24, 360f);
         }
 
-        executingAction = false;
+        _executingAction = false;
     }
     
     IEnumerator WarpBurstPattern()
     {
-        executingAction = true;
+        _executingAction = true;
 
         for (int z = 0; z < 3; z++)
         {
@@ -344,12 +389,12 @@ public class Boss : MonoBehaviour
         
         yield return new WaitForSecondsRealtime(2f);
 
-        executingAction = false;
+        _executingAction = false;
     }
 
     IEnumerator DeathBarragePattern(GameObject subpattern)
     {
-        executingAction = true;
+        _executingAction = true;
 
         //GameObject[] subpatternPlanes = subpattern.GetComponentsInChildren<GameObject>();
         List<GameObject> subpatternPlanes = new List<GameObject>();
@@ -390,6 +435,6 @@ public class Boss : MonoBehaviour
             yield return new WaitForSecondsRealtime(0.025f);
         }
 
-        executingAction = false;
+        _executingAction = false;
     }
 }

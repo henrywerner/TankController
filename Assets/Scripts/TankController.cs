@@ -106,14 +106,10 @@ public class TankController : MonoBehaviour
         // vfx
         if (_gunshotParticles != null)
         {
-            // ParticleSystem gunshotVFX = Instantiate(_gunshotParticles, transform.position, Quaternion.identity);
-            // gunshotVFX.gameObject.transform.rotation = _gun.transform.rotation;
-            // gunshotVFX.gameObject.SetActive(true);
-            
             _gunshotParticles.Play();
         }
 
-        StartCoroutine(CameraShake.current.Shake(_fireRate, 0.1f));
+        //StartCoroutine(CameraShake.current.Shake(_fireRate, 0.1f));
 
         // wait for fire rate duration 
         yield return new WaitForSecondsRealtime(_fireRate);

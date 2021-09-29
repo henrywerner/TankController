@@ -56,10 +56,13 @@ public class UI : MonoBehaviour
             StartCoroutine(UpdateHurtBar());
     }
 
+    /* Red vignette animation and screen shake */
     IEnumerator RedScreen()
     {
+        StartCoroutine(CameraShake.current.Shake(0.4f, 0.4f)); // Screen shake
+        
         float time = 0;
-        float duration = 1.3f;
+        float duration = 0.8f;
         float alpha = 0f;
         
         _redScreen.color = new Color(1, 1, 1, 0);
